@@ -1,81 +1,349 @@
-#!/bin/sh
+#!/usr/bin/zsh
 #
 
-# determine $width, 80 by default
-if [ -z "$1" ]; then
-  WIDTH=80
-else  
-  WIDTH="$1"
+# timescreen
+#
+# A script to take the date in intelligent formats and run it through figlet.
+# Output should basically give you a nice full-screen clock. 
+#
+#
+# Version Log? - nothing to clear though...
+#
+# TODO's
+#  . some sanity checking on options - and existance of figlet and fonts...
+#  . controllable alarm clock
+#  . stopwatch/timer
+#  . alarm clock 
+#  . able to run something external for chiming the hours (eg, `saytime`)
+#  . recode in C (reimpliment figlet renderer? eugh) make figlet a library?
+#    > figlet licensing means "FIG" would have to be in title then. "figclock"
+#  . use tput rather than echo (if someone needs it ... let me know!)
+#    + likely better support on wider ranges of terminals
+#    - yet another process to spawn every second. (rather then `echo`, which is
+#      built into the more advanced sh interpreters!
+#  . set path to figlet as a variable
+#
+# BUGS
+#  . figfonts specified in rcfile may be overridden by the big fonts if the width is
+#    too wide...
+#
+#
+# 4.x's (late 2000ish)
+#  . config file (-rc= )
+#  . figlet binary option (-figbin= )
+#
+# 3.x's (middle 2000ish)
+#  . double-width secondbar when width is wide enough
+#  . new commandline options for: (they should be obvious I hope)
+#	-w=xx	(set width) 
+#	-l	(turn on looping)
+#	-b	(turn on beeps)
+#	-f 	(turn on fortunes)
+#	-m	(turn on mail check)
+#	-s	(turn on secondbar)
+#	-fn1	(figlet font for date)
+#	-fn2	(figlet font for time)
+#	-d	(double-height secondbar)
+#  . screen not cleared on EVERY minute. Only when nescessary now.
+#  . improved sh compliancy (tested against ash mostly)
+#    and uses /usr/bin/zsh by default (5x better CPU performance
+#    compared to bash. marginally worse memory usage)
+#  . clock (not date tho) is in bold. easier to see :)
+#
+# 2.x's (early 2000)
+#  . function groovybar as a "second hand"
+#  . slightly better random fortune setup
+#
+# 1.x's (1999ish)
+#  . internal looping
+#  . argument for width
+#  . implemented random fortunes
+#
+# betas: (1998ish)
+#  . seperate scripts for different fonts. 
+#  . very basic execution of concept
+#  . no error checking, nothing fancy
+#  . no internal looping
+#
+
+# some default settings
+DOLOOP=no
+DOBEEP=no
+DOFORTUNE=no
+DOCHKMAIL=no
+DOSECONDS=no
+TALLSECONDS=no
+MAILCOUNT=2
+FORTCOUNT=6
+FIGBIN=/usr/bin/figlet
+# Default fonts - fit nicely in a 80 width screen.
+#  these may be overridden later by larger fonts if the $WIDTH is sufficient
+#  or by commandline settings. (highest priority)
+# note: rcfile font options have same priority as here - $WIDTH will override!
+DATEFONT=thick		
+TIMEFONT=colossal	
+
+RCFILE=$HOME/.timescreenrc
+
+echo $RCFILE
+
+# let's parse these commandline arguments. all arguments should be - or -- 
+# in nature, EXCEPT one. the width. why? cos I can code it this way at the
+# moment ;)
+# but also cos all other arguments at the moment are switches/toggles.
+# there is nothing to set. The defaults are off, these switch them on. Sorry,
+# but at the moment, that's how it is. I can't be bothered setting it up better
+# ...besides, the default is the simplest. Cope. 
+
+version="\
+timescreen, by Owen Cameron <nemo@net.house.cx>
+   version 4 (rc file)
+"
+
+
+usage="\
+
+Usage: timescreen [options] [--version] [--help]
+	options are  
+	  -w=xx		(set width in chars)
+	  -l		(turn on looping)
+	  -s		(turn on second counter - only works when looping)
+	  -d		(double-height second counter)
+	  -b		(turn on chimes)
+	  -f		(turn on fortunes) (every 7 minutes)
+	  -m		(turn on mail check) *every 3 minutes)
+	  -fn1=xxxx	(figlet font for date)
+	  -fn2=xxxx	(figlet font for time)
+	  -figbin=/path/to/figlet	(full command path to figlet)
+	  -rc=/path/to/.timescreenrc	($HOME/.timescreenrc by default)
+	  
+** Note on fonts: by default, the date is displayed using figlet font 'thick'
+**	and the time using figlet font 'colossal'
+** If -w is set, and the value is 95 or greater, then the default fonts become
+**	'roman' for the date, and 'doh' for the time. 
+** The -fn1 and -fn2 settings have priority over both of these.
+** 'showfigfonts(6)'  will give you a runthrough of all your fonts
+"
+
+
+for arg
+do
+  opt=`echo $arg|sed 's/^\([^=]*\).*/\1/'`
+  val=`echo $arg|sed 's/^[^=]*=\(.*\)/\1/'`
+  case "$opt" in
+    -w) WIDTH="$val" ;;
+    -l) DOLOOP="yes" ; CLEARSCREEN="yes"  ;; # CLEARSCREEN affects only start. 
+    -b) DOBEEP="yes" ;;
+    -f) DOFORTUNE="yes" ;;
+    -m) DOCHKMAIL="yes" ;;
+    -s) DOSECONDS="yes" ;;
+    -d) TALLSECONDS="yes" ;;
+    -fn1) DATEFONT="$val" ; DATEFONT_FN1="yes" ;;
+    -fn2) TIMEFONT="$val" ; TIMEFONT_FN2="yes" ;;
+    -figbin) FIGBIN="$val" ;;
+    -rc) RCFILE="$val" ;;
+    --version) echo "$version"; exit 0 ;;
+    --help) echo "$version" "$usage"; exit 0 ;;
+    *) echo "timescreen: invalid option $arg
+	$usage" >&2
+	exit 1
+	;;
+  esac
+done
+
+
+## check for the existance of a config file, and if it exists, use it. 
+# this config file is simply a static list of hte settings you want... ;)
+if [ -x $RCFILE ]; then
+. $RCFILE
 fi
 
-# setup relevant figletfonts.
-# "big" font style should be fine for widths 95 and greater
+
+# determine $width. (if not set from -w). Use $COLUMNS from shell,
+# then fall back to 80
+if [ -z "$WIDTH" ]; then
+  if [ -z "$COLUMNS" ]; then
+    WIDTH=80
+  else
+    WIDTH=$COLUMNS
+  fi
+fi
+
+# setup relevant figletfonts for a width greater/equal to 95
+# ONLY if they have not been set from the commandline
 if [ "$WIDTH" -ge "95" ]; then
-  DATEFONT=roman	# font the date (Day Month Number) uses 
-  TIMEFONT=doh		# font the time (hours:minutes) shows up as
-else
-  DATEFONT=thick	# again, defaults here are for smaller widths
-  TIMEFONT=colossal	# (testing seems to show 95 is wide enough for "big"
+  if [ -z "$DATEFONT_FN1" ]; then
+    #DATEFONT=roman
+    DATEFONT=nancyj
+  fi
+  if [ -z "$TIMEFONT_FN2" ]; then
+    TIMEFONT=doh
+  fi
 fi  
 
 
-function groovybar () {
+groovybar () {
 
-echo -n "   -=[....:...10....:...20....:...30....:...40....:...50....:...60]=-"
+# fudge an extra second to ensure the scripted minute doesn't end too soon
+# ...it sucks when that happens!
+TEMPSEC=`date '+%-S'`
+SEC_ELAPSED=$(($TEMPSEC+1))
+SEC_REMAINING=$((60-$SEC_ELAPSED))
 
-echo -ne "\e[0G   -=["
-# fudge ~2 seconds for the time it takes to do the figlets/fortunes
-TEMPSEC=`date '+%S'`
-SEC_ELAPSED=`echo $[$TEMPSEC+2]`
-for i in `seq 1 $SEC_ELAPSED` ; do
-  echo -n "*"
-done
+if [ "$DOSECONDS" = "yes" ]; then
+  # setup the groovybar centered on the screen
+  if [ "$WIDTH" -ge "125" ] ; then 
+    SPACES=$((($WIDTH-125)/2)) 
+    echo -en "\e["$SPACES"C"
+    echo -ne "-[\e[s        ..        ..        ||        ..        ..        ==        ..        ..        ||        ..        ..          ]-"
+    if [ "$TALLSECONDS" = "yes" ]; then
+      echo -en "\e[1E\e["$SPACES"C"
+      echo -ne "-[        ^^        ^^        ||        ^^        ^^        ==        ^^        ^^        ||        ^^        ^^          ]-"
+    fi
 
-SEC_REMAINING=`echo $[60-$SEC_ELAPSED]`
+  else
+    SPACES=$((($WIDTH-64)/2)) 
+    echo -en "\e["$SPACES"C"
+    echo -ne "-[\e[s    .    .    |    .    .    O    .    .    |    .    .     ]-"
+    if [ "$TALLSECONDS" = "yes" ]; then
+      echo -en "\e[1E\e["$SPACES"C"
+      echo -ne "-[              |              O              |               ]-"
+    fi
+  fi
 
-for i in `seq 1 "$SEC_REMAINING"` ; do
- sleep 1
- echo -n "#"
-done
+  echo -ne "\e[u"
 
- echo "]=-"
+  # so now we tell the groovybar to catch up those seconds...
+  if [ "$TALLSECONDS" = "yes" ]; then
+    if [ "$WIDTH" -ge "125" ] ; then
+      for i in `seq 1 "$SEC_ELAPSED"` ; do
+        echo -ne "##\e[2D\e[1B##\e[1A"
+      done
+    else
+      for i in `seq 1 "$SEC_ELAPSED"` ; do
+        echo -ne "#\e[1D\e[1B#\e[1A"
+      done
+    fi
+  else
+    if [ "$WIDTH" -ge "125" ] ; then
+      for i in `seq 1 "$SEC_ELAPSED"` ; do
+        echo -ne "##"
+      done
+    else
+      for i in `seq 1 "$SEC_ELAPSED"` ; do
+        echo -ne "#"
+      done
+    fi
+  fi
+  
+  # and now print each remaining second, in turn, as it needs to be
+  if [ "$TALLSECONDS" = "yes" ]; then
+    if [ "$WIDTH" -ge "125" ] ; then
+      for i in `seq 1 "$SEC_REMAINING"` ; do
+        sleep 1
+        echo -ne "##\e[2D\e[1B##\e[1A"
+      done
+    else
+      for i in `seq 1 "$SEC_REMAINING"` ; do
+        sleep 1
+        echo -ne "#\e[1D\e[1B#\e[1A"
+      done
+    fi
+  else
+    if [ "$WIDTH" -ge "125" ] ; then
+      for i in `seq 1 "$SEC_REMAINING"` ; do
+        sleep 1
+        echo -ne "##"
+      done
+    else
+      for i in `seq 1 "$SEC_REMAINING"` ; do
+        sleep 1
+        echo -ne "#"
+      done
+    fi
+  fi
+else
+  sleep $SEC_REMAINING
+fi 
 }
+
 
 
 # loop continuous and give us output!
 while true ; do
-  CURRENTSEC=`date '+%s'`
-#  clear
-  echo "devel version"
-  if [ `echo $[$CURRENTSEC%5]` == "0" ]; then
-    /usr/bin/figlet -f term -W -w "$WIDTH" -c `chkmail $MAIL`
+  # clear
+  # instead of clearing the screen, we just move the cursor back to the top
+  # and go again.
+  # we SHOULD do some checking here for fortune... since if a fortune is about
+  # to be used, this will make things look wierd. 
+
+  if [ "$DOLOOP" = "yes" ] ; then
+    echo -ne "\e[1;1f"     # reset the cursor to the topleft :)
+    echo -ne "\e[2K"    # erase this first line. 
+  fi
+
+  if [ "$CLEARSCREEN" = "yes" ] ; then
+    echo -ne "\e[2J"     # clear the screen
+    CLEARSCREEN="no"
+  fi
+  
+  echo " "
+  # we do a mail count every 3 instances. (used to be random)
+  if [ $MAILCOUNT -eq "3" ] && [ "$DOCHKMAIL" = "yes" ] ; then
+    echo -ne "\e[2K"  # erase an old uptime, those lines are longer
+    $FIGBIN -f term -W -w "$WIDTH" -c `chkmail $MAIL`
+    MAILCOUNT=0
   else
-    /usr/bin/figlet -f term -W -w "$WIDTH" -c `uptime`
+    $FIGBIN -f term -W -w "$WIDTH" -c `uptime`
+    MAILCOUNT=$(($MAILCOUNT+1))
   fi
   echo ""
-  /usr/bin/figlet -f term -W -w "$WIDTH" -c `date`
-  echo ""
-  if [ `echo $[$RANDOM%4]` == "0" ]; then 
+#   $FIGBIN -f term -W -w "$WIDTH" -c `date '+%a %e %b %H:%M:%S %Z %Y'`
+#   date +'%Y-%m-%d %T'    # ISO date/time format
+  echo " "
+  # we do a fortune every 7 instances. (used to be random)
+  if [ $FORTCOUNT -eq "7" ] && [ "$DOFORTUNE" = "yes" ] ; then 
+    echo -ne "\e[J"     # clear the screen below cursor 
     /usr/games/fortune -a
-    echo ""
-    echo ""
+    echo " "
+    echo " "
+    CLEARSCREEN="yes"
+    FORTCOUNT=0
   else
-    /usr/bin/figlet -f $DATEFONT -W -w "$WIDTH" -c `date '+%a %-d %b'`
-    /usr/bin/figlet -f $TIMEFONT -W -w "$WIDTH" -c `date '+%H : %M'`
+    $FIGBIN -f $DATEFONT -W -w "$WIDTH" -c " "`date '+%a %-d %b'`" "
+    echo -en "\e[1m"
+    $FIGBIN -f $TIMEFONT -W -w "$WIDTH" -c " "`date '+%H : %M'`" "
+    echo -en "\e[0m"
+    FORTCOUNT=$(($FORTCOUNT+1))
   fi
 
   # if it's on the hour, beep a few times as appropriate 
-  if [ `date '+%M'` == "00" ]; then
+  if [ `date '+%M'` -eq "00" ]; then
+    # clear the second counting bar specificaly here since otherwise it's
+    # missplaced compared to normal... 
+    echo -ne "\e[J"     # clear the screen below cursor 
     OCLOCK=`date '+%l'`
+    # sleep a few seconds here to allow the rendering of the time to catch up
+    # on slow terminals. elsewise we lose each distinctive beep.
+    # 5 seconds should be fine
     sleep 5
-    for a in `seq 1 $OCLOCK` ; do
-      echo -en "$a . \a\a\a"
-      sleep 1
-    done
+    if [ "$DOBEEP" = "yes" ]; then
+      for a in `seq 1 $OCLOCK` ; do
+        echo -en "$a . \a\a\a"
+        sleep 1
+      done
+    else
+      echo -n "It's $OCLOCK "
+    fi
     echo "O'Clock and all's well!"
-    echo ""
+    echo " "
+    CLEARSCREEN="yes"
   fi
+  if [ "$DOLOOP" = "no" ]; then
+    exit 0
+  fi 
   groovybar
-done
 
+  sleep 1
+done
 exit 0
