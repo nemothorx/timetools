@@ -85,7 +85,6 @@ TIMEFONT=colossal
 
 RCFILE=$HOME/.timescreenrc
 
-echo $RCFILE
 
 # let's parse these commandline arguments. all arguments should be - or -- 
 # in nature, EXCEPT one. the width. why? cos I can code it this way at the
@@ -173,8 +172,7 @@ fi
 # ONLY if they have not been set from the commandline
 if [ "$WIDTH" -ge "95" ]; then
   if [ -z "$DATEFONT_FN1" ]; then
-    #DATEFONT=roman
-    DATEFONT=nancyj
+    DATEFONT=roman
   fi
   if [ -z "$TIMEFONT_FN2" ]; then
     TIMEFONT=doh
@@ -184,10 +182,10 @@ fi
 
 groovybar () {
 
-# fudge an extra second to ensure the scripted minute doesn't end too soon
+# fudge an extra few seconds to ensure the scripted minute doesn't end too soon
 # ...it sucks when that happens!
 TEMPSEC=`date '+%-S'`
-SEC_ELAPSED=$(($TEMPSEC+1))
+SEC_ELAPSED=$(($TEMPSEC-1))
 SEC_REMAINING=$((60-$SEC_ELAPSED))
 
 if [ "$DOSECONDS" = "yes" ]; then
@@ -210,6 +208,12 @@ if [ "$DOSECONDS" = "yes" ]; then
       echo -ne "-[              |              O              |               ]-"
     fi
   fi
+
+  # anything below the groovybar, put it here now:
+  echo -e "\n\e[J"
+  tail -8 $HOME/var/log/fmail.log
+  #
+
 
   echo -ne "\e[u"
 
@@ -297,7 +301,7 @@ while true ; do
     $FIGBIN -f term -W -w "$WIDTH" -c `uptime`
     MAILCOUNT=$(($MAILCOUNT+1))
   fi
-  echo ""
+#   echo ""
 #   $FIGBIN -f term -W -w "$WIDTH" -c `date '+%a %e %b %H:%M:%S %Z %Y'`
 #   date +'%Y-%m-%d %T'    # ISO date/time format
   echo " "
@@ -332,10 +336,8 @@ while true ; do
         echo -en "$a . \a\a\a"
         sleep 1
       done
-    else
-      echo -n "It's $OCLOCK "
     fi
-    echo "O'Clock and all's well!"
+    echo "It\'s $OCLOCK O\'Clock and all\'s well!"
     echo " "
     CLEARSCREEN="yes"
   fi
@@ -343,7 +345,5 @@ while true ; do
     exit 0
   fi 
   groovybar
-
-  sleep 1
 done
 exit 0
