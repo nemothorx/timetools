@@ -1,0 +1,53 @@
+#!/bin/bash
+
+function showtime () {
+        TIME=$1;
+        OUT=""
+	
+	#echo "original: $TIME"
+        
+	SECS=$(($TIME%60));		# any leftover seconds from a minute
+        TIME=$(($TIME - $SECS));	# then remove those...
+        
+	# TIME should now be an exact num minutes
+	#echo "less $SECS seconds: $TIME"
+				
+	MINS=$((($TIME%3600)/60));	# any leftover minutes from an hour
+        TIME=$(($TIME - ($MINS*60)));	# then remove those...
+        
+	# TIME should now be an exact num hours
+	#echo "less $MINS minutes: $TIME"
+				
+	HRS=$((($TIME%86400)/3600));	# any leftover hours in a day
+        TIME=$(($TIME - ($HRS*3600)));		# then remove those...
+	
+	# TIME should now be an exact num days 
+	#echo "less $HRS hours: $TIME"
+	
+	DAYS=$(($TIME/86400));
+	
+	if [[ $DAYS -ne 0 ]]; then
+                OUT="${DAYS} days"
+        fi
+	if [[ $HRS -ne 0 ]]; then
+                OUT="${OUT} ${HRS} hours"
+        fi
+        if [[ $MINS -ne 0 ]]; then
+                OUT="${OUT} ${MINS} minutes"
+        fi
+        if [[ $SECS -ne 0 ]]; then
+                OUT="${OUT} ${SECS} seconds"
+        fi
+}
+
+if [[ $1 == "" ]]; then
+	foo=$(date +%s)
+else
+	foo=$1
+fi
+
+showtime $foo
+UNIX_OUT=$(date -d "1970-01-01 $foo sec" +"%Y-%m-%d %T %z")
+
+echo "$OUT since epoch"
+echo "Assuming UNIX epoch (1970-01-01), that makes it $UNIX_OUT"
