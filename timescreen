@@ -182,6 +182,10 @@ fi
 
 groovybar () {
 
+sleep 2 # wait a efw seconds before doing the groovybar so that fmail.log
+	# is caught up on. 
+
+
 # fudge an extra few seconds to ensure the scripted minute doesn't end too soon
 # ...it sucks when that happens!
 TEMPSEC=`date '+%-S'`
@@ -212,8 +216,6 @@ if [ "$DOSECONDS" = "yes" ]; then
   # anything below the groovybar, put it here now:
   echo -e "\n\e[J"
   tail -8 $HOME/var/log/fmail.log
-  #
-
 
   echo -ne "\e[u"
 
