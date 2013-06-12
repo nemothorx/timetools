@@ -1,6 +1,5 @@
 #!/usr/bin/zsh
 #
-
 # timescreen
 #
 # A script to take the date in intelligent formats and run it through figlet.
@@ -26,7 +25,18 @@
 # BUGS
 #  . figfonts specified in rcfile may be overridden by the big fonts if the width is
 #    too wide...
+# 4.3 (2013 march 20)
+# . removed chkmail option. I dont use that anymore. 
+#  . cleaned up the duobleheight groovybar (echo was adding unwanted newline)
 #
+# 4.2 (2012 feb 16)
+#  . using TOIlet instead of figlet. Still calls /usr/bin/figlet though,
+#	but -c (center) option is not available, so has been removed from
+#	script. Some leading spacing added in places to hackishly compensate. 
+#
+# 4.1 (late 2010ish)
+#  . barest minimum of changes from control codes to tput, so as to work in tmux
+#    ...not a full replacement. Just enough for my common use. 
 #
 # 4.x's (late 2000ish)
 #  . config file (-rc= )
@@ -70,12 +80,11 @@
 DOLOOP=no
 DOBEEP=no
 DOFORTUNE=no
-DOCHKMAIL=no
 DOSECONDS=no
 TALLSECONDS=no
-MAILCOUNT=2
 FORTCOUNT=6
 FIGBIN=/usr/bin/figlet
+FIGDIR=/usr/share/figlet
 # Default fonts - fit nicely in a 80 width screen.
 #  these may be overridden later by larger fonts if the $WIDTH is sufficient
 #  or by commandline settings. (highest priority)
@@ -134,7 +143,6 @@ do
     -l) DOLOOP="yes" ; CLEARSCREEN="yes"  ;; # CLEARSCREEN affects only start. 
     -b) DOBEEP="yes" ;;
     -f) DOFORTUNE="yes" ;;
-    -m) DOCHKMAIL="yes" ;;
     -s) DOSECONDS="yes" ;;
     -d) TALLSECONDS="yes" ;;
     -fn1) DATEFONT="$val" ; DATEFONT_FN1="yes" ;;
@@ -196,38 +204,41 @@ if [ "$DOSECONDS" = "yes" ]; then
   # setup the groovybar centered on the screen
   if [ "$WIDTH" -ge "125" ] ; then 
     SPACES=$((($WIDTH-125)/2)) 
-    echo -en "\e["$SPACES"C"
+    echo -en "\e[${SPACES}C"
     echo -ne "-[\e[s        ..        ..        ||        ..        ..        ==        ..        ..        ||        ..        ..          ]-"
     if [ "$TALLSECONDS" = "yes" ]; then
-      echo -en "\e[1E\e["$SPACES"C"
+      echo -ne "\e[${SPACES}C"
       echo -ne "-[        ^^        ^^        ||        ^^        ^^        ==        ^^        ^^        ||        ^^        ^^          ]-"
     fi
 
   else
     SPACES=$((($WIDTH-64)/2)) 
-    echo -en "\e["$SPACES"C"
-    echo -ne "-[\e[s    .    .    |    .    .    O    .    .    |    .    .     ]-"
+    echo -ne "\e[${SPACES}C"
+    echo -n "-[" ; tput sc ; echo "    .    .    |    .    .    O    .    .    |    .    .     ]-"
     if [ "$TALLSECONDS" = "yes" ]; then
-      echo -en "\e[1E\e["$SPACES"C"
+      echo -ne "\e[${SPACES}C"
       echo -ne "-[              |              O              |               ]-"
     fi
   fi
 
   # anything below the groovybar, put it here now:
   echo -e "\n\e[J"
-  tail -8 $HOME/var/log/fmail.log
+  tail -5 $HOME/var/log/fmail.log | ccze -A
 
-  echo -ne "\e[u"
+  #echo -ne "\e[u"
+  tput rc
 
   # so now we tell the groovybar to catch up those seconds...
   if [ "$TALLSECONDS" = "yes" ]; then
     if [ "$WIDTH" -ge "125" ] ; then
       for i in `seq 1 "$SEC_ELAPSED"` ; do
-        echo -ne "##\e[2D\e[1B##\e[1A"
+        # echo -ne "##\e[2D\e[1B##\e[1A"
+        echo -n "##" ; tput cub 2 ; tput cud 1 ; echo -n "##" ; tput cuu 1
       done
     else
       for i in `seq 1 "$SEC_ELAPSED"` ; do
-        echo -ne "#\e[1D\e[1B#\e[1A"
+        # echo -ne "#\e[1D\e[1B#\e[1A"
+        echo -n "#" ; tput cub 1 ; tput cud 1 ; echo -n "#" ; tput cuu 1 
       done
     fi
   else
@@ -247,12 +258,14 @@ if [ "$DOSECONDS" = "yes" ]; then
     if [ "$WIDTH" -ge "125" ] ; then
       for i in `seq 1 "$SEC_REMAINING"` ; do
         sleep 1
-        echo -ne "##\e[2D\e[1B##\e[1A"
+        #echo -ne "##\e[2D\e[1B##\e[1A"
+        echo -n "##" ; tput cub 2 ; tput cud 1 ; echo -n "##" ; tput cuu 1
       done
     else
       for i in `seq 1 "$SEC_REMAINING"` ; do
         sleep 1
-        echo -ne "#\e[1D\e[1B#\e[1A"
+        #echo -ne "#\e[1D\e[1B#\e[1A"
+        echo -n "#" ; tput cub 1 ; tput cud 1 ; echo -n "#" ; tput cuu 1 
       done
     fi
   else
@@ -284,27 +297,23 @@ while true ; do
   # to be used, this will make things look wierd. 
 
   if [ "$DOLOOP" = "yes" ] ; then
-    echo -ne "\e[1;1f"     # reset the cursor to the topleft :)
-    echo -ne "\e[2K"    # erase this first line. 
+    #echo -ne "\e[1;1f"     # reset the cursor to the topleft :)
+    #echo -ne "\e[2K"    # erase this first line. 
+    tput cup 0 0
   fi
 
   if [ "$CLEARSCREEN" = "yes" ] ; then
-    echo -ne "\e[2J"     # clear the screen
+#    echo -ne "\e[2J"     # clear the screen
+     tput clear
     CLEARSCREEN="no"
   fi
   
   echo " "
-  # we do a mail count every 3 instances. (used to be random)
-  if [ $MAILCOUNT -eq "3" ] && [ "$DOCHKMAIL" = "yes" ] ; then
-    echo -ne "\e[2K"  # erase an old uptime, those lines are longer
-    $FIGBIN -f term -W -w "$WIDTH" -c `chkmail $MAIL`
-    MAILCOUNT=0
-  else
-    $FIGBIN -f term -W -w "$WIDTH" -c `uptime`
-    MAILCOUNT=$(($MAILCOUNT+1))
-  fi
+  $FIGBIN -f term -W -w "$WIDTH" "        "`uptime`
+  echo ""
+  myinternode.sh 
 #   echo ""
-#   $FIGBIN -f term -W -w "$WIDTH" -c `date '+%a %e %b %H:%M:%S %Z %Y'`
+#   $FIGBIN -f term -W -w "$WIDTH" `date '+%a %e %b %H:%M:%S %Z %Y'`
 #   date +'%Y-%m-%d %T'    # ISO date/time format
   echo " "
   # we do a fortune every 7 instances. (used to be random)
@@ -316,9 +325,9 @@ while true ; do
     CLEARSCREEN="yes"
     FORTCOUNT=0
   else
-    $FIGBIN -f $DATEFONT -W -w "$WIDTH" -c " "`date '+%a %-d %b'`" "
+    figlet -d $FIGDIR -f $DATEFONT -w "$WIDTH" " "`date '+%a %-d %b'`
     echo -en "\e[1m"
-    $FIGBIN -f $TIMEFONT -W -w "$WIDTH" -c " "`date '+%H : %M'`" "
+    figlet -d $FIGDIR -f $TIMEFONT -w "$WIDTH" "     "`date '+%H : %M'`" "
     echo -en "\e[0m"
     FORTCOUNT=$(($FORTCOUNT+1))
   fi
@@ -339,7 +348,7 @@ while true ; do
         sleep 1
       done
     fi
-    echo "It\'s $OCLOCK O\'Clock and all\'s well!"
+    echo "It's $OCLOCK O'Clock and all's well!"
     echo " "
     CLEARSCREEN="yes"
   fi
