@@ -30,13 +30,13 @@ function showtime () {
                 OUT="${DAYS} days"
         fi
 	if [[ $HRS -ne 0 ]]; then
-                OUT="${OUT} ${HRS} hours"
+                OUT="${OUT} ${HRS} hrs"
         fi
         if [[ $MINS -ne 0 ]]; then
-                OUT="${OUT} ${MINS} minutes"
+                OUT="${OUT} ${MINS} mins"
         fi
         if [[ $SECS -ne 0 ]]; then
-                OUT="${OUT} ${SECS} seconds"
+                OUT="${OUT} ${SECS} secs"
         fi
 }
 
@@ -48,6 +48,6 @@ fi
 
 showtime $foo
 UNIX_OUT=$(date -d "1970-01-01 00:00:00 +0000 $foo sec" +"%Y-%m-%d %T %z")
+UNIX_OUT=$(date -d "@$foo")
 
-echo "$OUT since epoch"
-echo "Assuming UNIX epoch (1970-01-01), that makes it $UNIX_OUT"
+echo "$UNIX_OUT ($OUT)"
