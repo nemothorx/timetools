@@ -1,67 +1,73 @@
 #!/bin/bash
 
-echo -en "Localtime  :\t"
-date +"%Y-%b-%d %R %z %Z"
+#echo -en "Localtime  :\t"
+#date +"%Y-%b-%d %R %z %Z"
+#
+#echo "--"
+#
+#echo -en "Los Angelos :\t"
+#export TZ="America/Los_Angeles"
+#date +"%Y-%b-%d %R %z %Z"
+#
+#echo -en "Mexico City :\t"
+#export TZ="America/Mexico_City"
+#date +"%Y-%b-%d %R %z %Z"
+#
+#echo -en "New York    :\t"
+#export TZ="America/New_York"
+#date +"%Y-%b-%d %R %z %Z"
+#
+#echo -en "Buenos Aires:\t"
+#export TZ="America/Buenos_Aires"
+#date +"%Y-%b-%d %R %z %Z"
+#
+#echo -en "London      :\t"
+#export TZ="Europe/London"
+#date +"%Y-%b-%d %R %z %Z"
+#
+#echo -en "Rome        :\t"
+#export TZ="Europe/Rome"
+#date +"%Y-%b-%d %R %z %Z"
+#
+#echo -en "Cairo       :\t"
+#export TZ="Africa/Cairo"
+#date +"%Y-%b-%d %R %z %Z"
+#
+#echo -en "Moscow      :\t"
+#export TZ="Europe/Moscow"
+#date +"%Y-%b-%d %R %z %Z"
+#
+#echo -en "Calcutta    :\t"
+#export TZ="Asia/Calcutta"
+#date +"%Y-%b-%d %R %z %Z"
+#
+#echo -en "Perth       :\t"
+#export TZ="Australia/Perth"
+#date +"%Y-%b-%d %R %z %Z"
+#
+#echo -en "Hong Kong   :\t"
+#export TZ="Asia/Hong_Kong"
+#date +"%Y-%b-%d %R %z %Z"
+#
+#echo -en "Tokyo       :\t"
+#export TZ="Asia/Tokyo"
+#date +"%Y-%b-%d %R %z %Z"
+#
+#echo -en "Sydney      :\t"
+#export TZ="Australia/Sydney"
+#date +"%Y-%b-%d %R %z %Z"
+#
+#echo -en "Auckland    :\t"
+#export TZ="Pacific/Auckland"
+#date +"%Y-%b-%d %R %z %Z"
+#
+#
+#
 
-echo ""
-
-echo -en "Los Angelos :\t"
-export TZ="America/Los_Angeles"
-date +"%Y-%b-%d %R %z %Z"
-
-echo -en "Mexico City :\t"
-export TZ="America/Mexico_City"
-date +"%Y-%b-%d %R %z %Z"
-
-echo -en "New York    :\t"
-export TZ="America/New_York"
-date +"%Y-%b-%d %R %z %Z"
-
-echo -en "Buenos Aires:\t"
-export TZ="America/Buenos_Aires"
-date +"%Y-%b-%d %R %z %Z"
-
-echo -en "London      :\t"
-export TZ="Europe/London"
-date +"%Y-%b-%d %R %z %Z"
-
-echo -en "Rome        :\t"
-export TZ="Europe/Rome"
-date +"%Y-%b-%d %R %z %Z"
-
-echo -en "Cairo       :\t"
-export TZ="Africa/Cairo"
-date +"%Y-%b-%d %R %z %Z"
-
-echo -en "Moscow      :\t"
-export TZ="Europe/Moscow"
-date +"%Y-%b-%d %R %z %Z"
-
-echo -en "Calcutta    :\t"
-export TZ="Asia/Calcutta"
-date +"%Y-%b-%d %R %z %Z"
-
-echo -en "Perth       :\t"
-export TZ="Australia/Perth"
-date +"%Y-%b-%d %R %z %Z"
-
-echo -en "Hong Kong   :\t"
-export TZ="Asia/Hong_Kong"
-date +"%Y-%b-%d %R %z %Z"
-
-echo -en "Tokyo       :\t"
-export TZ="Asia/Tokyo"
-date +"%Y-%b-%d %R %z %Z"
-
-echo -en "Sydney      :\t"
-export TZ="Australia/Sydney"
-date +"%Y-%b-%d %R %z %Z"
-
-echo -en "Auckland    :\t"
-export TZ="Pacific/Auckland"
-date +"%Y-%b-%d %R %z %Z"
-
-
-
+date
+echo "----"
+for tz in US/Pacific US/Mountain US/Central US/Eastern Brazil/East UTC Europe/London Europe/Rome Africa/Cairo Europe/Moscow Asia/Calcutta Asia/Hong_Kong Asia/Tokyo Australia/West Australia/North Australia/Brisbane Australia/South Australia/NSW Pacific/Fiji Pacific/Auckland Pacific/Easter ; do
+    zdump $tz | sed -e 's/ /,/'
+done | column -t -s,
 
 
