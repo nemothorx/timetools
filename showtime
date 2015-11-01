@@ -28,6 +28,7 @@ function showtime () {
 	
 	if [[ $DAYS -ne 0 ]]; then
                 OUT="${DAYS} days"
+		DAYDEC=${DAYS}
         fi
 	if [[ $HRS -ne 0 ]]; then
                 OUT="${OUT} ${HRS} hrs"
@@ -38,6 +39,10 @@ function showtime () {
         if [[ $SECS -ne 0 ]]; then
                 OUT="${OUT} ${SECS} secs"
         fi
+
+	# the hours/min/sec are what % of a day?
+	DECPART=$(echo "scale=3 ; ($1-$TIME)/86400" | bc | tr -d ".")
+	DAYDEC="${DAYDEC}.${DECPART}"
 }
 
 if [[ $1 == "" ]]; then
@@ -47,7 +52,7 @@ else
 fi
 
 showtime $foo
-UNIX_OUT=$(date -d "1970-01-01 00:00:00 +0000 $foo sec" +"%Y-%m-%d %T %z")
+# UNIX_OUT=$(date -d "1970-01-01 00:00:00 +0000 $foo sec" +"%Y-%m-%d %T %z")
 UNIX_OUT=$(date -d "@$foo")
 
-echo "$UNIX_OUT ($OUT)"
+echo "$UNIX_OUT ($OUT [$DAYDEC days])"
