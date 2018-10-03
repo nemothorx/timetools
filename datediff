@@ -10,4 +10,6 @@ second=$2
 
 sectot=$(( $(date -d $second +%s) - $(date -d $first +%s) ))
 
-echo "$(showtime $sectot | sed -e 's/.*(\(.*\))/\1/g') ($sectot seconds)"
+echo "$(showtime -s $sectot)"
+# this should be in an echo triggered by a verbose flag?
+# ($sectot seconds)"
