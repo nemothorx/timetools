@@ -1,5 +1,20 @@
 #!/bin/bash
 
+
+case $1 in
+    -*)
+        opt=${1:-a} # default to all
+        shift
+        ;;
+esac
+
+if [[ $1 == "" ]]; then
+	input=$(date +%s)
+else
+	input=$1
+fi
+
+
 function showtime () {
         TIME=$1;
         OUT=""
@@ -27,32 +42,54 @@ function showtime () {
 	DAYS=$(($TIME/86400));
 	
 	if [[ $DAYS -ne 0 ]]; then
-                OUT="${DAYS} days"
+                OUT="${DAYS}d"
 		DAYDEC=${DAYS}
         fi
 	if [[ $HRS -ne 0 ]]; then
-                OUT="${OUT} ${HRS} hrs"
+                OUT="${OUT} ${HRS}h"
         fi
         if [[ $MINS -ne 0 ]]; then
-                OUT="${OUT} ${MINS} mins"
+                OUT="${OUT} ${MINS}m"
         fi
         if [[ $SECS -ne 0 ]]; then
-                OUT="${OUT} ${SECS} secs"
+                OUT="${OUT} ${SECS}s"
         fi
 
 	# the hours/min/sec are what % of a day?
-	DECPART=$(echo "scale=3 ; ($1-$TIME)/86400" | bc | tr -d ".")
-	DAYDEC="${DAYDEC}.${DECPART}"
+        if [ "$opt" == "-v" ] ; then
+            DECPART=$(echo "scale=3 ; ($1-$TIME)/86400" | bc | tr -d ".")
+            DAYDEC="${DAYDEC}.${DECPART}"
+        fi
+        
+        # remove leading whitespace
+        OUT="$(echo -e "${OUT}" | sed -e 's/^[[:space:]]*//')"
 }
 
-if [[ $1 == "" ]]; then
-	foo=$(date +%s)
-else
-	foo=$1
-fi
 
-showtime $foo
-# UNIX_OUT=$(date -d "1970-01-01 00:00:00 +0000 $foo sec" +"%Y-%m-%d %T %z")
-UNIX_OUT=$(date -d "@$foo")
+showtime $input
 
-echo "$UNIX_OUT ($OUT [$DAYDEC days])"
+# UNIX_OUT=$(date -d "1970-01-01 00:00:00 +0000 $input sec" +"%Y-%m-%d %T %z")
+UNIX_OUT=$(date -d "@$input")
+
+# TODO: more output options
+# * verbose should use full words in it's $OUT
+
+case $opt in
+    -e)
+        # epoch only
+        echo "$UNIX_OUT"
+        ;;
+    -s)
+        # summary only
+        echo "$OUT"
+        ;;
+    -v)
+        # epoch and summary and day decimal
+        echo "$UNIX_OUT ($OUT [$DAYDEC days])"
+        ;;
+    *)
+        # epoch and summary
+        echo "$UNIX_OUT ($OUT)"
+        ;;
+esac
+
