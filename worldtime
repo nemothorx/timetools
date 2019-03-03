@@ -66,7 +66,7 @@
 
 date
 echo "----"
-for tz in US/Hawaii US/Pacific US/Mountain US/Central US/Eastern Pacific/Easter Brazil/East UTC Europe/London Europe/Rome Africa/Cairo Europe/Moscow Asia/Calcutta Asia/Hong_Kong Asia/Tokyo Australia/West Australia/North Australia/Brisbane Australia/South Australia/NSW Pacific/Fiji Pacific/Auckland ; do
+for tz in US/Hawaii US/Alaska US/Pacific US/Mountain US/Central US/Eastern Pacific/Easter Brazil/East UTC Europe/London Europe/Rome Africa/Cairo Asia/Baghdad Europe/Moscow Asia/Calcutta Asia/Bangkok Asia/Hong_Kong Australia/West Asia/Tokyo Australia/North Australia/Brisbane Australia/South Australia/NSW Pacific/Fiji Pacific/Auckland ; do
     zdump $tz | sed -e 's/ /,/'
 done | column -t -s,
 
