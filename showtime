@@ -68,6 +68,9 @@ function showtime () {
 
 showtime $input
 
+# if we got nothing, we make it explicit
+[ -z "$OUT" ] && OUT="0"
+
 # UNIX_OUT=$(date -d "1970-01-01 00:00:00 +0000 $input sec" +"%Y-%m-%d %T %z")
 UNIX_OUT=$(date -d "@$input")
 
