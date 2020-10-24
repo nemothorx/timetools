@@ -1,73 +1,17 @@
 #!/bin/bash
 
-#echo -en "Localtime  :\t"
-#date +"%Y-%b-%d %R %z %Z"
+# the original idea was condensed down to these few lines... before being expanded again to handle a date(1) compatible offset in $1
 #
-#echo "--"
+#d=$(date "+%a %b %d %T %Y %Z")
+bon=$(tput rev)
+boff=$(tput sgr0)
 #
-#echo -en "Los Angelos :\t"
-#export TZ="America/Los_Angeles"
-#date +"%Y-%b-%d %R %z %Z"
-#
-#echo -en "Mexico City :\t"
-#export TZ="America/Mexico_City"
-#date +"%Y-%b-%d %R %z %Z"
-#
-#echo -en "New York    :\t"
-#export TZ="America/New_York"
-#date +"%Y-%b-%d %R %z %Z"
-#
-#echo -en "Buenos Aires:\t"
-#export TZ="America/Buenos_Aires"
-#date +"%Y-%b-%d %R %z %Z"
-#
-#echo -en "London      :\t"
-#export TZ="Europe/London"
-#date +"%Y-%b-%d %R %z %Z"
-#
-#echo -en "Rome        :\t"
-#export TZ="Europe/Rome"
-#date +"%Y-%b-%d %R %z %Z"
-#
-#echo -en "Cairo       :\t"
-#export TZ="Africa/Cairo"
-#date +"%Y-%b-%d %R %z %Z"
-#
-#echo -en "Moscow      :\t"
-#export TZ="Europe/Moscow"
-#date +"%Y-%b-%d %R %z %Z"
-#
-#echo -en "Calcutta    :\t"
-#export TZ="Asia/Calcutta"
-#date +"%Y-%b-%d %R %z %Z"
-#
-#echo -en "Perth       :\t"
-#export TZ="Australia/Perth"
-#date +"%Y-%b-%d %R %z %Z"
-#
-#echo -en "Hong Kong   :\t"
-#export TZ="Asia/Hong_Kong"
-#date +"%Y-%b-%d %R %z %Z"
-#
-#echo -en "Tokyo       :\t"
-#export TZ="Asia/Tokyo"
-#date +"%Y-%b-%d %R %z %Z"
-#
-#echo -en "Sydney      :\t"
-#export TZ="Australia/Sydney"
-#date +"%Y-%b-%d %R %z %Z"
-#
-#echo -en "Auckland    :\t"
-#export TZ="Pacific/Auckland"
-#date +"%Y-%b-%d %R %z %Z"
-#
-#
-#
-
-date
-echo "----"
-for tz in US/Hawaii US/Alaska US/Pacific US/Mountain US/Central US/Eastern Pacific/Easter Brazil/East UTC Europe/London Europe/Rome Africa/Cairo Asia/Baghdad Europe/Moscow Asia/Calcutta Asia/Bangkok Asia/Hong_Kong Australia/West Asia/Tokyo Australia/North Australia/Brisbane Australia/South Australia/NSW Pacific/Fiji Pacific/Auckland ; do
-    zdump $tz | sed -e 's/ /,/'
-done | column -t -s,
+#zdump US/Hawaii US/Alaska US/Pacific US/Mountain US/Central US/Eastern Pacific/Easter Brazil/East UTC Europe/London Europe/Rome Africa/Cairo Asia/Baghdad Europe/Moscow Asia/Calcutta Asia/Bangkok Asia/Hong_Kong Australia/West Asia/Tokyo Australia/North Australia/Brisbane Australia/South Australia/NSW Pacific/Fiji Pacific/Auckland | sed -e "s/  /,/g ; s/, /,/g ; s/$d/$bon$d$boff/g" | column -t -s,
 
 
+when=${1:-now}
+d=$(date -d "$when" "+%a %b %d %T %Y %Z")
+
+(for t in US/Hawaii US/Alaska US/Pacific US/Mountain US/Central US/Eastern Pacific/Easter Brazil/East UTC Europe/London Europe/Rome Africa/Cairo Asia/Baghdad Europe/Moscow Asia/Calcutta Asia/Bangkok Asia/Hong_Kong Australia/West Asia/Tokyo Australia/North Australia/South Australia/Brisbane Australia/NSW Pacific/Fiji Pacific/Auckland ; do
+    echo "$t,$(TZ=$t date -d "$when" "+%a %b %d %T %Y %Z")"
+done) | sed -e "s/$d/$bon$d$boff/g" | column -t -s,
