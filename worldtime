@@ -10,8 +10,13 @@ boff=$(tput sgr0)
 
 
 when=${1:-now}
-d=$(date -d "$when" "+%a %b %d %T %Y %Z")
+z=$(date -d "$when" "+%z")
+
+# TODO: 
+# indicate timezone name as well. 
+# debian: text string in /etc/timezone
+# centos/rh: binary contents of /etc/localtime (might be symlink sometimes?)
 
 (for t in US/Hawaii US/Alaska US/Pacific US/Mountain US/Central US/Eastern Pacific/Easter Brazil/East UTC Europe/London Europe/Rome Africa/Cairo Asia/Baghdad Europe/Moscow Asia/Calcutta Asia/Bangkok Asia/Hong_Kong Australia/West Asia/Tokyo Australia/North Australia/South Australia/Brisbane Australia/NSW Pacific/Fiji Pacific/Auckland ; do
-    echo "$t,$(TZ=$t date -d "$when" "+%a %b %d %T %Y %Z")"
-done) | sed -e "s/$d/$bon$d$boff/g" | column -t -s,
+    echo "$t,$(TZ=$t date -d "$when" "+%z, %a %b %d %T %Y %Z$boff")"
+done) | sed -e "s/$z/$bon$z/g" | column -t -s,
