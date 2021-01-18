@@ -9,6 +9,41 @@ boff=$(tput sgr0)
 #zdump US/Hawaii US/Alaska US/Pacific US/Mountain US/Central US/Eastern Pacific/Easter Brazil/East UTC Europe/London Europe/Rome Africa/Cairo Asia/Baghdad Europe/Moscow Asia/Calcutta Asia/Bangkok Asia/Hong_Kong Australia/West Asia/Tokyo Australia/North Australia/Brisbane Australia/South Australia/NSW Pacific/Fiji Pacific/Auckland | sed -e "s/  /,/g ; s/, /,/g ; s/$d/$bon$d$boff/g" | column -t -s,
 
 
+# Should be updated to reflect Canonical by preference, as per https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+# ...so USA using the city that the deprecated points to. eg, US/Central is a link to America/Chicago
+# ...but I'm using some deprecated because damnit, the names are better known at a glance
+tzlist="Pacific/Midway
+US/Hawaii 
+US/Alaska
+US/Pacific
+US/Mountain
+US/Central
+US/Eastern
+Pacific/Easter
+Chile/Continental
+Brazil/West
+Brazil/East
+Atlantic/Azores
+UTC
+Europe/London
+Europe/Rome
+Africa/Cairo
+Asia/Baghdad
+Europe/Moscow
+Asia/Dubai
+Asia/Calcutta
+Asia/Dhaka
+Asia/Bangkok
+Asia/Hong_Kong
+Australia/West
+Asia/Tokyo
+Australia/North
+Australia/South
+Australia/Brisbane
+Australia/NSW
+Pacific/Fiji
+Pacific/Auckland"
+
 when=${1:-now}
 abswhen=$(date -Iseconds -d "$when")
 z=$(date -d "$when" "+%z")
@@ -21,9 +56,10 @@ z=$(date -d "$when" "+%z")
 
 # version 2 used this loop (with better output), but failed on absolute strings.
 # so now it's used to calculate the local (reference) timezone name
-TZNAMEtmp=$( (for t in US/Hawaii US/Alaska US/Pacific US/Mountain US/Central US/Eastern Pacific/Easter Brazil/East UTC Europe/London Europe/Rome Africa/Cairo Asia/Baghdad Europe/Moscow Asia/Calcutta Asia/Bangkok Asia/Hong_Kong Australia/West Asia/Tokyo Australia/North Australia/South Australia/Brisbane Australia/NSW Pacific/Fiji Pacific/Auckland ; do
+TZNAMEtmp=$( (for t in $tzlist  ; do
     echo "$t,$(TZ=$t date -d "$when" "+%z")"
-done) | grep -m 1 $z | cut -d, -f 1 )
+done) | grep -m 1 -- $z | cut -d, -f 1)
+
 
 # if our attempt to calculate a TZ name fails, we have a default
 TZNAME=${TZNAMEtmp:-UTC}
@@ -31,6 +67,11 @@ TZNAME=${TZNAMEtmp:-UTC}
 # version 3: pretty much the V2 loop, but with the TZ=TZNAME param. 
 # ...we now handle both absolute and relative time
 
-(for t in US/Hawaii US/Alaska US/Pacific US/Mountain US/Central US/Eastern Pacific/Easter Brazil/East UTC Europe/London Europe/Rome Africa/Cairo Asia/Baghdad Europe/Moscow Asia/Calcutta Asia/Bangkok Asia/Hong_Kong Australia/West Asia/Tokyo Australia/North Australia/South Australia/Brisbane Australia/NSW Pacific/Fiji Pacific/Auckland ; do
+ddiff=$(datediff now "$abswhen")
+
+( (for t in $tzlist ; do
     echo "$t,$(TZ=$t date -d "TZ=\"$TZNAME\" $abswhen" "+%z, %a %b %d %T %Y %Z$boff")"
-done) | sed -e "s/$z/$bon$z/g" | column -t -s,
+done) | sed -e "s/$z/$bon$z/g" ; [ "$ddiff" != "0" ] && echo -e "\n${bon}offset from now, , $ddiff$boff" ) | column -t -s,
+
+
+exit
