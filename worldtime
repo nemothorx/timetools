@@ -56,6 +56,7 @@ z=$(date -d "$when" "+%z")
 
 # version 2 used this loop (with better output), but failed on absolute strings.
 # so now it's used to calculate the local (reference) timezone name
+# 2021 01 28 - output now uses RFC5322 style with additional +%Z. Highlighting of current timezone improved to suit
 TZNAMEtmp=$( (for t in $tzlist  ; do
     echo "$t,$(TZ=$t date -d "$when" "+%z")"
 done) | grep -m 1 -- $z | cut -d, -f 1)
@@ -70,8 +71,8 @@ TZNAME=${TZNAMEtmp:-UTC}
 ddiff=$(datediff now "$abswhen")
 
 ( (for t in $tzlist ; do
-    echo "$t,$(TZ=$t date -d "TZ=\"$TZNAME\" $abswhen" "+%z, %a %b %d %T %Y %Z$boff")"
-done) | sed -e "s/$z/$bon$z/g" ; [ "$ddiff" != "0" ] && echo -e "\n${bon}offset from now, , $ddiff$boff" ) | column -t -s,
+    echo -e "${t};$(TZ=$t date -d "TZ=\"$TZNAME\" $abswhen" "+%a, %d %b %Y %T %z ;(+%Z)$boff")"
+done) | sed -e "s/\(.* $z .*\)/$bon\1/g" ; [ "$ddiff" != "0" ] && echo -e "\n${bon}offset from now ; $ddiff$boff" ) | column -t -s';'
 
 
 exit
