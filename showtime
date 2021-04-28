@@ -1,5 +1,7 @@
+#!/usr/bin/zsh
 #!/bin/bash
 
+#set -x
 
 case $1 in
     -*)
@@ -21,19 +23,19 @@ function showtime () {
 	
 	#echo "original: $TIME"
         
-	SECS=$(($TIME%60));		# any leftover seconds from a minute
-        TIME=$(($TIME - $SECS));	# then remove those...
+        SECS=$(printf "%05.2f" "$(($TIME%60))");	# any leftover seconds from a minute
+        TIME=$(printf "%1.0f" "$(($TIME - $SECS))");	# then remove those and ensure integer (this rounds up as a float)
         
 	# TIME should now be an exact num minutes
 	#echo "less $SECS seconds: $TIME"
 				
-	MINS=$((($TIME%3600)/60));	# any leftover minutes from an hour
+        MINS=$(printf "%02d" "$((($TIME%3600)/60))");	# any leftover minutes from an hour
         TIME=$(($TIME - ($MINS*60)));	# then remove those...
         
 	# TIME should now be an exact num hours
 	#echo "less $MINS minutes: $TIME"
 				
-	HRS=$((($TIME%86400)/3600));	# any leftover hours in a day
+        HRS=$(printf "%02d" "$((($TIME%86400)/3600))");	# any leftover hours in a day
         TIME=$(($TIME - ($HRS*3600)));		# then remove those...
 	
 	# TIME should now be an exact num days 
@@ -56,7 +58,7 @@ function showtime () {
         fi
 
 	# the hours/min/sec are what % of a day?
-        if [ "$opt" == "-v" ] ; then
+        if [[ "$opt" == "-v" ]] ; then
             DECPART=$(echo "scale=3 ; ($1-$TIME)/86400" | bc | tr -d ".")
             DAYDEC="${DAYDEC}.${DECPART}"
         fi
@@ -64,7 +66,6 @@ function showtime () {
         # remove leading whitespace
         OUT="$(echo -e "${OUT}" | sed -e 's/^[[:space:]]*//')"
 }
-
 
 showtime $input
 
@@ -85,6 +86,11 @@ case $opt in
     -s)
         # summary only
         echo "$OUT"
+        ;;
+    -S)
+        # summary format 2
+        [ $DAYS -gt 0 ] && echo -n "${DAYS}d"
+        echo "$HRS:$MINS:$SECS"
         ;;
     -v)
         # epoch and summary and day decimal
