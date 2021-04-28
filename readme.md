@@ -1,5 +1,6 @@
-# Timetools is a collection of personal helper scripts for dealing with chronology
+# Nemo's Timetools 
 
+This is a collection of personal helper scripts for dealing with chronology
 
 ## Worldtime - show times around the world. 
 
@@ -25,6 +26,19 @@ note. worldtime uses datediff
 
 ## datediff - show the time difference between two dates
 
+Any date(1) compatible date should work. Defaults to "now" if no second date given. 
+
+eg: 
+`datediff "01-Jan-1970" "@155555555"`
+
 note: datediff uses showtime
 
 ## showtime - show the time for a given number of seconds
+
+eg: 
+`showtime 155555555`
+
+
+
+## TODO: 
+* Improve help/usage within scripts
