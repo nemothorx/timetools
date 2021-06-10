@@ -1,13 +1,38 @@
 #!/bin/bash
 
-# the original idea was condensed down to these few lines... before being expanded again to handle a date(1) compatible offset in $1
+# worldtime shows timezones around the world for "now" by default, or by any date(1) compatible date in $1
+#
+# The local timezone offset is highlighted. 
+#
+
+case $1 in
+    -h|--help|examples)
+        echo "
+# Simple usage: 
+    worldtime
+
+# Advanced usage - show times of a different time. 
+
+    worldtime <date(1) compatible date/time string>
+eg
+    worldtime '19 may 2021 03:00'
+
+# Super advanced usage - show times of a different time given in a different timezone
+
+    worldtime '19 may 2021 18:00 BST'
+or (same text result, but changes the highlight indicating local time)
+    TZ=Europe/London worldtime '19 may 2021 18:00'
+"
+    exit 0
+    ;;
+esac
+
+
 #
 #d=$(date "+%a %b %d %T %Y %Z")
 bon=$(tput rev)
 boff=$(tput sgr0)
 #
-#zdump US/Hawaii US/Alaska US/Pacific US/Mountain US/Central US/Eastern Pacific/Easter Brazil/East UTC Europe/London Europe/Rome Africa/Cairo Asia/Baghdad Europe/Moscow Asia/Calcutta Asia/Bangkok Asia/Hong_Kong Australia/West Asia/Tokyo Australia/North Australia/Brisbane Australia/South Australia/NSW Pacific/Fiji Pacific/Auckland | sed -e "s/  /,/g ; s/, /,/g ; s/$d/$bon$d$boff/g" | column -t -s,
-
 
 # Should be updated to reflect Canonical by preference, as per https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
 # ...so USA using the city that the deprecated points to. eg, US/Central is a link to America/Chicago
