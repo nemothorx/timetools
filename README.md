@@ -1,4 +1,7 @@
-A simple script to show times around the world. 
+# Timetools is a collection of personal helper scripts for dealing with chronology
+
+
+## Worldtime - show times around the world. 
 
 Usage. 
 
@@ -17,5 +20,11 @@ eg"
 or
 `TZ=Europe/London worldtime '19 may 2021 18:00'`
 
+note. worldtime uses datediff
 
 
+## datediff - show the time difference between two dates
+
+note: datediff uses showtime
+
+## showtime - show the time for a given number of seconds
