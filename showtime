@@ -102,3 +102,6 @@ case $opt in
         ;;
 esac
 
+# TODO: check this... consider folding in and providing an option to display
+# human readable relative times "6 months, 3 weeks" style. 
+# https://unix.stackexchange.com/questions/364776/how-to-output-a-date-time-as-20-minutes-ago-or-9-days-ago-etc
