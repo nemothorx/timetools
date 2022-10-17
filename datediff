@@ -3,6 +3,14 @@
 # takes two dates (anything that date(1) can accept. best: YYYY-MM-DD) and returns the number of days between them. If no $2, then assumes today
 #
 
+# crude options
+case $1 in
+    -n|-r|--raw)    # no-lookup / raw mode
+        style=raw
+        shift
+        ;;
+esac
+
 first=$1
 second=$2
 [ -z $first ] && echo "I need a date!" && exit 1
@@ -10,6 +18,13 @@ second=$2
 
 sectot=$(( $(date -d $second +%s) - $(date -d $first +%s) ))
 
-echo "$(showtime -s $sectot)"
-# this should be in an echo triggered by a verbose flag?
-# ($sectot seconds)"
+case $style in
+    raw)
+        echo $sectot
+        ;;
+    *)      # default is human readable via showtime
+        echo "$(showtime -s $sectot)"
+        # this should be in an echo triggered by a verbose flag?
+        # echo "$(showtime -s $sectot) ($sectot seconds)"
+        ;;
+esac
