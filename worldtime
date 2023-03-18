@@ -74,9 +74,11 @@ abswhen=$(date -Iseconds -d "$when")
 z=$(date -d "$when" "+%z")
 
 # TODO: 
-# indicate timezone name as well. 
-# debian: text string in /etc/timezone
-# centos/rh: binary contents of /etc/localtime (might be symlink sometimes?)
+# * indicate timezone name as well. 
+#   - debian: text string in /etc/timezone
+#   - centos/rh: binary contents of /etc/localtime (might be symlink sometimes?)
+# * simple asciigraphical display of day/night location of each
+#   - inspired by everytimezone.com
 #
 
 # version 2 used this loop (with better output), but failed on absolute strings.
