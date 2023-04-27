@@ -12,19 +12,20 @@
 #  . some sanity checking on options - and existance of figlet and fonts...
 #  . controllable alarm clock
 #  . stopwatch/timer
-#  . alarm clock 
-#  . able to run something external for chiming the hours (eg, `saytime`)
-#  . recode in C (reimpliment figlet renderer? eugh) make figlet a library?
-#    > figlet licensing means "FIG" would have to be in title then. "figclock"
-#  . use tput rather than echo (if someone needs it ... let me know!)
-#    + likely better support on wider ranges of terminals
-#    - yet another process to spawn every second. (rather then `echo`, which is
-#      built into the more advanced sh interpreters!
+#  . able to run something external for chiming the hours (eg, `saytime` or `george`)
+#  . use tput rather than echo
 #  . set path to figlet as a variable
 #
 # BUGS
-#  . figfonts specified in rcfile may be overridden by the big fonts if the width is
-#    too wide...
+#  . figfonts specified in rcfile may be overridden by the big fonts if the width is too wide...
+#
+# 4.4 (2023 Apr 27)
+# - removing "myinternet" info
+# - replacing sleep with sleepenh for more accurate timekeeping
+# - new LOLCAT ability (figlet output pipes into this processor)
+# - fix tall+wide bug on groovybar
+# - some cleanup of replacing explicit escape codes with tput
+#
 # 4.3 (2013 march 20)
 # . removed chkmail option. I dont use that anymore. 
 #  . cleaned up the duobleheight groovybar (echo was adding unwanted newline)
@@ -85,6 +86,7 @@ TALLSECONDS=no
 FORTCOUNT=6
 FIGBIN=/usr/bin/figlet
 FIGDIR=/usr/share/figlet
+LOLCAT=/usr/games/lolcat
 # Default fonts - fit nicely in a 80 width screen.
 #  these may be overridden later by larger fonts if the $WIDTH is sufficient
 #  or by commandline settings. (highest priority)
@@ -190,24 +192,24 @@ fi
 
 groovybar () {
 
-sleep 2 # wait a efw seconds before doing the groovybar so that fmail.log
-	# is caught up on. 
-
 
 # fudge an extra few seconds to ensure the scripted minute doesn't end too soon
 # ...it sucks when that happens!
-TEMPSEC=`date '+%-S'`
-SEC_ELAPSED=$(($TEMPSEC-1))
+SEC_ELAPSED=$(date '+%-S')
 SEC_REMAINING=$((60-$SEC_ELAPSED))
 
+tstamp=$(sleepenh 0)
+
 if [ "$DOSECONDS" = "yes" ]; then
-  # setup the groovybar centered on the screen
   if [ "$WIDTH" -ge "125" ] ; then 
     SPACES=$((($WIDTH-125)/2)) 
-    echo -en "\e[${SPACES}C"
+    # Above centers the groovybar, but modern figlet doesn't center, so I limit the spacing thus: 
+    [ $SPACES -gt 10 ] && SPACES=10
+    tput cuf ${SPACES}
     echo -ne "-[\e[s        ..        ..        ||        ..        ..        ==        ..        ..        ||        ..        ..          ]-"
     if [ "$TALLSECONDS" = "yes" ]; then
-      echo -ne "\e[${SPACES}C"
+      echo ""
+      tput cuf ${SPACES}
       echo -ne "-[        ^^        ^^        ||        ^^        ^^        ==        ^^        ^^        ||        ^^        ^^          ]-"
     fi
 
@@ -223,7 +225,8 @@ if [ "$DOSECONDS" = "yes" ]; then
 
   # anything below the groovybar, put it here now:
   echo -e "\n\e[J"
-  tail -5 $HOME/var/log/fmail.log | ccze -A
+#  tail -5 $HOME/var/log/fmail.log | ccze -A
+  md-count | column | head -5 | ccze -A
 
   #echo -ne "\e[u"
   tput rc
@@ -257,13 +260,13 @@ if [ "$DOSECONDS" = "yes" ]; then
   if [ "$TALLSECONDS" = "yes" ]; then
     if [ "$WIDTH" -ge "125" ] ; then
       for i in `seq 1 "$SEC_REMAINING"` ; do
-        sleep 1
+        tstamp=$(sleepenh $tstamp 1.0)
         #echo -ne "##\e[2D\e[1B##\e[1A"
         echo -n "##" ; tput cub 2 ; tput cud 1 ; echo -n "##" ; tput cuu 1
       done
     else
       for i in `seq 1 "$SEC_REMAINING"` ; do
-        sleep 1
+        tstamp=$(sleepenh $tstamp 1.0)
         #echo -ne "#\e[1D\e[1B#\e[1A"
         echo -n "#" ; tput cub 1 ; tput cud 1 ; echo -n "#" ; tput cuu 1 
       done
@@ -271,12 +274,12 @@ if [ "$DOSECONDS" = "yes" ]; then
   else
     if [ "$WIDTH" -ge "125" ] ; then
       for i in `seq 1 "$SEC_REMAINING"` ; do
-        sleep 1
+        tstamp=$(sleepenh $tstamp 1.0)
         echo -ne "##"
       done
     else
       for i in `seq 1 "$SEC_REMAINING"` ; do
-        sleep 1
+        tstamp=$(sleepenh $tstamp 1.0)
         echo -ne "#"
       done
     fi
@@ -299,7 +302,8 @@ while true ; do
   if [ "$DOLOOP" = "yes" ] ; then
     #echo -ne "\e[1;1f"     # reset the cursor to the topleft :)
     #echo -ne "\e[2K"    # erase this first line. 
-    tput cup 0 0
+    tput cup 0 0    # cursor to topleft
+    tput el         # erase line
   fi
 
   if [ "$CLEARSCREEN" = "yes" ] ; then
@@ -311,7 +315,7 @@ while true ; do
   echo " "
   $FIGBIN -f term -W -w "$WIDTH" "        "`uptime`
   echo ""
-  myinternode.sh 
+#  myinternode.sh 
 #   echo ""
 #   $FIGBIN -f term -W -w "$WIDTH" `date '+%a %e %b %H:%M:%S %Z %Y'`
 #   date +'%Y-%m-%d %T'    # ISO date/time format
@@ -325,9 +329,9 @@ while true ; do
     CLEARSCREEN="yes"
     FORTCOUNT=0
   else
-    figlet -d $FIGDIR -f $DATEFONT -w "$WIDTH" " "`date '+%a %-d %b'`
+    $FIGBIN -d $FIGDIR -f $DATEFONT -w "$WIDTH" " "`date '+%a %-d %b'` | $LOLCAT
     echo -en "\e[1m"
-    figlet -d $FIGDIR -f $TIMEFONT -w "$WIDTH" "     "`date '+%H : %M'`" "
+    $FIGBIN -d $FIGDIR -f $TIMEFONT -w "$WIDTH" "     "`date '+%H : %M'`" " | $LOLCAT
     echo -en "\e[0m"
     FORTCOUNT=$(($FORTCOUNT+1))
   fi
@@ -340,8 +344,8 @@ while true ; do
     OCLOCK=`date '+%l'`
     # sleep a few seconds here to allow the rendering of the time to catch up
     # on slow terminals. elsewise we lose each distinctive beep.
-    # 5 seconds should be fine
-    sleep 5
+    # Originally 5 seconds. Making it 1 here in the 2020s
+    sleep 1
     if [ "$DOBEEP" = "yes" ]; then
       for a in `seq 1 $OCLOCK` ; do
         echo -en "$a . \a\a\a"
