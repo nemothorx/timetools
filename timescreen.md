@@ -6,6 +6,10 @@ Originally designed to run in `screen` continuously, hence name
 
 Time rendered big via figlet/toilet
 
+## Example gif or it didn't example
+
+![timescreen.gif](https://github.com/nemothorx/timescreen/assets/455930/fa855a3e-5b53-4087-b712-14164829e51d)
+
 ## TODO's
  - some sanity checking on options - and existance of figlet and fonts...
  - controllable alarm clock
