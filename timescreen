@@ -119,9 +119,9 @@ if [ -z "$WIDTH" ]; then
   fi
 fi
 
-# setup relevant figletfonts for a width greater/equal to 95
+# setup relevant figletfonts for a width greater/equal to 105
 # ONLY if they have not been set from the commandline
-if [ "$WIDTH" -ge "95" ]; then
+if [ "$WIDTH" -ge "105" ]; then
   if [ -z "$DATEFONT_FN1" ]; then
     DATEFONT=roman
   fi
