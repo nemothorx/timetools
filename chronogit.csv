@@ -1,0 +1,47 @@
+raw/readme.md__past repohistory.md initial repohistory.md detailing the history of timetools and this repo
+
+raw/timescreen/2000-03-15T21:50:50+10:00.f6b5d70.timescreen timescreen timescreen: 2.x (Earliest found in backups)\\n\\nFeaturing\\n* basic width detection\\n* random "fortune"\\n* seconds indicator ("groovybar")\\n* hourly BEL chimes\\n\\noriginal changelog (obtained from 4.x. probably written 3.x)\\n\\n2.x's (early 2000)\\n . function groovybar as a "second hand"\\n . slightly better random fortune setup\\n\\n1.x's (1999ish)\\n . internal looping\\n . argument for width\\n . implemented random fortunes\\n\\nbetas: (1998ish)\\n . seperate scripts for different fonts.\\n . very basic execution of concept\\n . no error checking, nothing fancy\\n . no internal looping
+
+raw/timescreen/2001-12-12T13:48:30+10:00.7dbe0b2.timescreen timescreen timescreen: 4.x (catchup. No intermediate versions found)\\n\\n4.x's (late 2000ish)\\n . config file (-rc= )\\n . figlet binary option (-figbin= )\\n\\n3.x's (middle 2000ish)\\n . double-width secondbar when width is wide enough\\n . new commandline options for: (they should be obvious I hope)\\n      -w=xx   (set width)\\n      -l      (turn on looping)\\n      -b      (turn on beeps)\\n      -f      (turn on fortunes)\\n      -m      (turn on mail check)\\n      -s      (turn on secondbar)\\n      -fn1    (figlet font for date)\\n      -fn2    (figlet font for time)\\n      -d      (double-height secondbar)\\n . screen not cleared on EVERY minute. Only when nescessary now.\\n . improved sh compliancy (tested against ash mostly)\\n   and uses /usr/bin/zsh by default (5x better CPU performance\\n   compared to bash. marginally worse memory usage)\\n . clock (not date tho) is in bold. easier to see :)
+
+
+
+raw/2003-05-01_10:06:50__showtime showtime showtime: Turns a number of seconds into days/hours/etc
+raw/2003-06-05_20:11:31__showtime showtime showtime: clarify time_t epoch
+raw/timescreen/2005-01-12T07:12:30+10:00.f5b7c98.timescreen timescreen timescreen: 4.x (catchup. Minor bugfix/polish. Added fmail.log watch)
+raw/2005-05-04_08:34:29__worldtime worldtime worldtime: v1: time in local+14 named places. Uses TZ= repeatedly
+raw/timescreen/2005-08-03T19:53:46+10:00.f7b9988.timescreen timescreen timescreen: 4.x (catchup. Added a sleep to lose fmail.log race)
+raw/timescreen/2013-06-13T09:24:31+10:00.66062f9.timescreen timescreen timescreen: 4.3 (catchup. No intermediates found)\\n\\n4.3 (2013 march 20)\\n. removed chkmail option. I dont use that anymore.\\n . cleaned up the duobleheight groovybar (echo was adding unwanted newline)\\n\\n4.2 (2012 feb 16)\\n . using TOIlet instead of figlet. Still calls /usr/bin/figlet though,\\n      but -c (center) option is not available, so has been removed from\\n      script. Some leading spacing added in places to hackishly compensate.\\n\\n4.1 (late 2010ish)\\n . barest minimum of changes from control codes to tput, so as to work in tmux\\n   ...not a full replacement. Just enough for my common use.
+raw/2013-11-21_11:35:58__showtime showtime showtime: simplify output to one line in prep for datediff
+raw/2013-11-21_11:38:11__datediff datediff datediff: uses showtime to display time between two dates
+raw/2014-12-27_14:51:49__worldtime worldtime worldtime: v1.5: now uses zdump in a loop for 21 named places
+raw/2015-11-02_01:30:00__showtime showtime showtime: add a days-as-float result to output
+raw/2016-02-28_00:45:27__worldtime worldtime worldtime: improve order. Also reversed to travel west (sun following)
+raw/2016-03-02_04:26:46__worldtime worldtime worldtime: reverse order to original (ie: Left-to-Right map reading)
+raw/2017-03-01_18:01:50__worldtime worldtime worldtime: added US/Hawaii
+raw/2018-10-03_14:33:39__datediff datediff datediff: simplify output by pushing a -s summary flag option into showtime
+raw/2018-10-04_10:22:47__showtime showtime showtime: gain options for summary, verbose, epoch. defaults to epoch+summary
+raw/2019-03-03_23:36:06__worldtime worldtime worldtime: now 25 locations. added US/Alaska Asia/Baghdad and Asia/Bangkok
+raw/2020-05-30_13:34:59__showtime showtime showtime: bugfix output on zero seconds
+raw/2020-10-24_21:44:28__worldtime worldtime worldtime: v2 (shows evidence of lost late v1 versions): Now handles date param. Uses TZ= again
+raw/2020-11-05_15:57:11__worldtime worldtime worldtime: tweak output - timezone in hours now included
+raw/2021-01-13_12:27:52__worldtime worldtime worldtime: v3: fixes absolute time param bug and a race condition
+raw/2021-01-19_00:30:09__worldtime worldtime worldtime: both loops use the same tzlist array of 31. Also show datediff offset
+raw/2021-01-19_09:27:41__worldtime worldtime worldtime: switch Australia/Brisbane to Australia/Queensland
+raw/2021-01-28_12:44:24__worldtime worldtime worldtime: dates in RFC5322 style and improved highlighting
+raw/2021-04-28_12:06:40__showtime showtime showtime: now zsh for in-script float calculations Also second summary format
+raw/2021-05-20_00:42:01__worldtime_readme.md README.md added basic readme for worldtime
+raw/2021-06-10_21:30:34__worldtime worldtime worldtime: clean up old commented code and add help option
+raw/2021-10-30_19:39:53__readme.md README.md readme: broaden scope of readme to cover datediff and showtime
+raw/2021-11-10_12:28:59__readme.md README.md readme: add datediff and showtime examples
+raw/2022-08-23_12:06:40__showtime showtime showtime: add a todo note for friendy relative times
+raw/2022-10-17_18:25:58__datediff datediff datediff: add crude option for raw output of seconds
+raw/2023-03-18_21:49:38__worldtime worldtime worldtime: add todo note for asciigraphic representation of day
+
+raw/timescreen/2023-04-27T23:33:36+10:00.cb36366.timescreen timescreen timescreen: 4.4 (original timescreen repo created via chronocsv2git/git-timemachine)\\n\\n4.4 (2023 Apr 27)\\n- removing "myinternet" info\\n- replacing sleep with sleepenh for more accurate timekeeping\\n- new LOLCAT ability (figlet output pipes into this processor)\\n- fix tall+wide bug on groovybar\\n- some cleanup of replacing explicit escape codes with tput
+raw/timescreen/2023-04-28T00:18:31+10:00.eba4b6d.README.md timescreen.md
+raw/timescreen/2023-04-28T00:18:31+10:00.eba4b6d.timescreen timescreen timescreen: moved comment doco into new timescreen.md. 
+raw/timescreen/2023-05-28T22:08:04+10:00.f79ce95.timescreen timescreen timescreen: Further long overdue cleanup, including:\\n\\n* cursor invisibility\\n* trap ctrlC\\n* better centering (toilet does not center things like figlet could)\\n* improve groovybar and use tput generated cursor movement
+raw/timescreen/2023-05-29T23:59:32+10:00.50a0d75.README.md timescreen.md updated timescreen.md - added a gif (stored in github assets)
+raw/timescreen/2023-05-30T21:56:50+10:00.98e7095.timescreen timescreen timescreen: the wide font threshold changed from 95 to 105
+
