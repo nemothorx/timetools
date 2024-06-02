@@ -1,7 +1,24 @@
 #!/usr/bin/zsh
 #
 # Note: up to 4.4, script began with doco details of TODO/BUGS/VersionLog
-# It has since been moved into it's own README.md
+# Versionlog was then moved into it's own readme, and then into the commitlog
+# of the timetools repo
+
+
+### TODO's
+# - some sanity checking on options - and existance of figlet and fonts...
+# - controllable alarm clock
+# - stopwatch/timer
+# - able to run something external for chiming the hours (eg, `saytime` or `george`)
+# - use tput rather than echo
+# - set path to figlet as a variable
+#
+### BUGS
+# - figfonts specified in rcfile may be overridden by the big fonts if the width is too wide...
+#
+
+
+
 
 # some default settings
 DOLOOP=no
