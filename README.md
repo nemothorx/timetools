@@ -19,7 +19,7 @@ Time rendered big via figlet/toilet
 
 ### Example gif or it didn't example
 
-![timescreen.gif](https://github.com/nemothorx/timescreen/assets/455930/fa855a3e-5b53-4087-b712-14164829e51d)
+![timescreen.gif](https://github.com/nemothorx/timetools/assets/455930/f9b28c02-d537-436f-9f05-97e504c18f63)
 
 
 ## Worldtime - show times around the world. 
