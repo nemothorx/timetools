@@ -5,11 +5,17 @@
 # The local timezone offset is highlighted. 
 #
 
+listsize=short  # a default
+
+
 case $1 in
     -h|--help|examples)
         echo "
 # Simple usage: 
-    worldtime
+    worldtime [-l]
+
+    -l|--long - show 31 timezones around the world instead of the default 5
+        This option MUST be $1 before date(1) compatible dates noted below
 
 # Advanced usage - show times of a different time. 
 
@@ -22,9 +28,14 @@ eg
     worldtime '19 may 2021 18:00 BST'
 or (same text result, but changes the highlight indicating local time)
     TZ=Europe/London worldtime '19 may 2021 18:00'
+
 "
-    exit 0
-    ;;
+        exit 0
+        ;;
+    -l|--long)
+        listsize=long
+        shift
+        ;;
 esac
 
 
@@ -37,7 +48,18 @@ boff=$(tput sgr0)
 # Should be updated to reflect Canonical by preference, as per https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
 # ...so USA using the city that the deprecated points to. eg, US/Central is a link to America/Chicago
 # ...but I'm using some deprecated because damnit, the names are better known at a glance
-tzlist="Pacific/Midway
+
+case $listsize in
+    short) 
+        tzlist="US/Pacific
+US/Eastern
+Europe/London
+Asia/Hong_Kong
+Australia/Queensland
+        "
+        ;;
+    long)
+        tzlist="Pacific/Midway
 US/Hawaii 
 US/Alaska
 US/Pacific
@@ -68,6 +90,8 @@ Australia/Queensland
 Australia/NSW
 Pacific/Fiji
 Pacific/Auckland"
+        ;;
+esac
 
 when=${1:-now}
 abswhen=$(date -Iseconds -d "$when")
