@@ -14,7 +14,7 @@ case $1 in
 # Simple usage: 
     worldtime [-l]
 
-    -l|--long - show 31 timezones around the world instead of the default 5
+    -l|--long - show 32 timezones around the world instead of the default 5
         This option MUST be $1 before date(1) compatible dates noted below
 
 # Advanced usage - show times of a different time. 
@@ -84,6 +84,7 @@ Asia/Bangkok
 Asia/Hong_Kong
 Australia/West
 Asia/Tokyo
+Asia/Seoul
 Australia/North
 Australia/South
 Australia/Queensland
