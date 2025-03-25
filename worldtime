@@ -45,31 +45,32 @@ bon=$(tput rev)
 boff=$(tput sgr0)
 #
 
-# Should be updated to reflect Canonical by preference, as per https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
-# ...so USA using the city that the deprecated points to. eg, US/Central is a link to America/Chicago
-# ...but I'm using some deprecated because damnit, the names are better known at a glance
+# Has been updated to reflect Canonical names as per https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+# ...since the deprecated names no longer work with the latest linux
+# ...this despite that to my thinking, I'd rather the deprecated US/Eastern than America/New_York. US/Pacific rather than America/Los_Angeles. etc
+# TODO: option to have real-TZ/display-TZ pairs
 
 case $listsize in
     short) 
-        tzlist="US/Pacific
-US/Eastern
+        tzlist="America/Los_Angeles
+America/New_York
 Europe/London
 Asia/Hong_Kong
-Australia/Queensland
+Australia/Brisbane
         "
         ;;
     long)
-        tzlist="Pacific/Midway
-US/Hawaii 
-US/Alaska
-US/Pacific
-US/Mountain
-US/Central
-US/Eastern
+        tzlist="Pacific/Pago_Pago
+Pacific/Honolulu
+America/Anchorage
+America/Los_Angeles
+America/Denver
+America/Chicago
+America/New_York
 Pacific/Easter
-Chile/Continental
-Brazil/West
-Brazil/East
+America/Santiago
+America/Manaus
+America/Sao_Paulo
 Atlantic/Azores
 UTC
 Europe/London
@@ -78,17 +79,17 @@ Africa/Cairo
 Asia/Baghdad
 Europe/Moscow
 Asia/Dubai
-Asia/Calcutta
+Asia/Kolkata
 Asia/Dhaka
 Asia/Bangkok
 Asia/Hong_Kong
-Australia/West
+Australia/Perth
 Asia/Tokyo
 Asia/Seoul
-Australia/North
-Australia/South
-Australia/Queensland
-Australia/NSW
+Australia/Darwin
+Australia/Adelaide
+Australia/Brisbane
+Australia/Sydney
 Pacific/Fiji
 Pacific/Auckland"
         ;;
