@@ -14,8 +14,9 @@ case $1 in
 # Simple usage: 
     worldtime [-l]
 
-    -l|--long - show 32 timezones around the world instead of the default 5
-        This option MUST be $1 before date(1) compatible dates noted below
+    -l|--long|-v|--verbose
+        - show 32 timezones around the world instead of the default handful
+        - This option MUST be $1 before date(1) compatible dates noted below
 
 # Advanced usage - show times of a different time. 
 
@@ -32,7 +33,7 @@ or (same text result, but changes the highlight indicating local time)
 "
         exit 0
         ;;
-    -l|--long)
+    -l|--long|-v|--verbose)
         listsize=long
         shift
         ;;
@@ -52,9 +53,24 @@ boff=$(tput sgr0)
 
 case $listsize in
     short) 
+        # short list is this five:
+          # US Pacific
+          # US Eastern
+          # UTC 
+          # London
+          # Brisbane
+          # ...and any extras to suit specific people or projects:
+            # Detroit for Mr Siefen (GPP podcast)
+            # Ljubljana for Davorin (GPP)
+            # Dubai for Srihari (GPP)
+            # Hong Kong for Tika
         tzlist="America/Los_Angeles
+America/Detroit
 America/New_York
+UTC
 Europe/London
+Europe/Ljubljana
+Asia/Dubai
 Asia/Hong_Kong
 Australia/Brisbane
         "
