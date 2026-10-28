@@ -1,0 +1,51 @@
+#!/bin/bash
+
+# represent the 24 hour day in a horizontal bar
+# as inspired by https://www.reddit.com/r/IndustrialDesign/comments/1w2m5g4/i_made_a_clock_that_shows_the_day_as_a_progress/
+
+# for an 80 character terminal width, we can either: 
+# * 1char/30min = 2/hour = 48/day, leaving 32 blank
+#   * the 32 could fit 16 hours, which could be 8 hours into each neighbour day
+# * 1char/20min = 3/hour = 72/day, leaving 8 blank (1h20 into each neighbour)
+
+# either way, can use unicode block characters to break each character into eights
+# ...eights to fill the block, when pull back to 7/8th block when the next 1/8 block is shown, so as to ensure nice crisp block divisions
+
+# better in the long run of course is dynamic width
+
+# colour themes
+# * solid
+# * gradient from misc a->b
+# * night/twilight/day/dusk/night theme. this would require knowing local date and lat/long, and some tool to calculate/lookup these values for us (hdate ?)
+#     hdate -l 27.5 -L 153 -z +10:00 --not-sunset-aware
+# characters not yet "filled" should be pre-filled with a marker though, esp when using the day/night theme, as it'd be good to know when night is coming
+# ...so I'm thinking a unicode centre dot for that
+
+hrs=$(date +%H)
+min=$(date +%M)
+
+width=$(tput cols)
+
+greyfg=$(tput setaf 8)
+whitefg=$(tput setaf 7)
+
+echo todo: display $hrs:$min in width $width
+
+printf "16  18  20  22  00  02  04  06  08  10  12  14  16  18  20  22  00  02  04  06 \n"
+
+printf "${greyfg}▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉${whitefg}"
+
+for count in $(seq 1 $hrs) ; do
+  printf "▉▉"
+done
+
+for count in $(seq 0 $((23-hrs))) ; do
+  printf "▖▖"
+done
+
+
+printf "${greyfg}▖▖▖▖▖▖▖▖▖▖▖▖▖▖▖▖${whitefg}"
+
+printf "\n"
+
+
