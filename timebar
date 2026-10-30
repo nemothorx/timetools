@@ -29,22 +29,82 @@ width=$(tput cols)
 greyfg=$(tput setaf 8)
 whitefg=$(tput setaf 7)
 
-echo todo: display $hrs:$min in width $width
+# echo todo: display $hrs:$min in width $width
 
-printf "16  18  20  22  00  02  04  06  08  10  12  14  16  18  20  22  00  02  04  06 \n"
+# TODO: 
+# * consider keeping the bar as FULL width, and moving the date/time into the hours bar
+#   - pro: the bar is cleaner
+#   - con: the hours ruler is messier, and the bar by itself doesn't have that extra info
+# * consider whether the alignment of hours to the bar is visually best
 
-printf "${greyfg}▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉${whitefg}"
+# printf "16  18  20  22  00  02  04  06  08  10  12  14  16  18  20  22  00  02  04  06 \n"
 
+# yesterday
+printf "%s" $(date +%a%d%b)
+printf "${greyfg}▉▉▉▉▉▉▉▉${whitefg}"
+
+# complete hours done
 for count in $(seq 1 $hrs) ; do
   printf "▉▉"
 done
 
-for count in $(seq 0 $((23-hrs))) ; do
-  printf "▖▖"
+#current hour
+
+# 1/8th char per 225 seconds (3m45)
+#
+#    0-224  = space (prev = full) #█       2588    FULL BLOCK
+#  225-449  = 1/8 (prev 7/8)      #▏       258F    LEFT ONE EIGHTH BLOCK
+#  450-674  = 2/8                 #▎       258E    LEFT ONE QUARTER BLOCK
+#  675-899  = 3/8                 #▍       258D    LEFT THREE EIGHTHS BLOCK
+#  900-1124 = 4/8                 #▌       258C    LEFT HALF BLOCK
+# 1125-1349 = 5/8                 #▋       258B    LEFT FIVE EIGHTHS BLOCK
+# 1350-1574 = 6/8                 #▊       258A    LEFT THREE QUARTERS BLOCK
+# 1575-1799 = 7/8                 #▉       2589    LEFT SEVEN EIGHTHS BLOCK
+# 1800-2024 = space (prev = full) #█       2588    FULL BLOCK
+# 2025-2249 = 1/8 (prev 7/8)      #▏       258F    LEFT ONE EIGHTH BLOCK
+# 2250-2474 = 2/8                 #▎       258E    LEFT ONE QUARTER BLOCK
+# 2475-2699 = 3/8                 #▍       258D    LEFT THREE EIGHTHS BLOCK
+# 2700-2924 = 4/8                 #▌       258C    LEFT HALF BLOCK
+# 2925-3149 = 5/8                 #▋       258B    LEFT FIVE EIGHTHS BLOCK
+# 3150-3374 = 6/8                 #▊       258A    LEFT THREE QUARTERS BLOCK
+# 3375-3599 = 7/8                 #▉       2589    LEFT SEVEN EIGHTHS BLOCK
+
+scnds=$(date +"%M*60+%_S" | bc)
+
+# sneaky case use as per https://stackoverflow.com/questions/12614011/how-to-use-a-range-of-numbers-as-a-case-statement-in-bash
+
+# we print a • for each half hour we're not yet touched
+
+case 1 in
+  $(($scnds <= 224)))  tput cub 1 ; printf "█ •" ;;
+  $(($scnds <= 449)))  printf "▏•" ;;
+  $(($scnds <= 674)))  printf "▎•" ;;
+  $(($scnds <= 899)))  printf "▍•" ;;
+  $(($scnds <= 1124)))  printf "▌•" ;;
+  $(($scnds <= 1349)))  printf "▋•" ;;
+  $(($scnds <= 1574)))  printf "▊•" ;;
+  $(($scnds <= 1799)))  printf "▉•" ;;
+  $(($scnds <= 2024)))  printf "█ " ;; 
+  $(($scnds <= 2249)))  printf "▉▏" ;;
+  $(($scnds <= 2474)))  printf "▉▎" ;;
+  $(($scnds <= 2699)))  printf "▉▍" ;;
+  $(($scnds <= 2924)))  printf "▉▌" ;;
+  $(($scnds <= 3149)))  printf "▉▋" ;;
+  $(($scnds <= 3374)))  printf "▉▊" ;;
+  $(($scnds <= 3599)))  printf "▉▉" ;;
+esac
+
+
+
+# complete hours remaining
+for count in $(seq 1 $((23-hrs))) ; do
+  printf "••"
 done
 
+# tomorrow
+printf "${greyfg}••••••••${whitefg}"
 
-printf "${greyfg}▖▖▖▖▖▖▖▖▖▖▖▖▖▖▖▖${whitefg}"
+printf "%s" $(date +"%H:%M:%S")
 
 printf "\n"
 
